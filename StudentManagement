@@ -1,0 +1,172 @@
+package codsoft;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class StudentManagement {
+	    private List<Student> students = new ArrayList<>();
+	    private final String fileName = "students.dat";
+
+	    public StudentManagement() {
+	        loadStudentData();
+	    }
+	    public void addStudent(Student student) {
+	        students.add(student);
+	        System.out.println("Student added successfully.");
+	        saveStudentData();
+	    }
+	    public void removeStudent(int rollNumber) {
+	        Student studentToRemove = null;
+	        for (Student student : students) {
+	            if (student.getRollNumber() == rollNumber) {
+	                studentToRemove = student;
+	                break;
+	            }
+	        }
+	        if (studentToRemove != null) {
+	            students.remove(studentToRemove);
+	            System.out.println("Student removed successfully.");
+	            saveStudentData();
+	        } 
+	        else {
+	            System.out.println("Student not found.");
+	        }
+	    }
+	    public void searchStudent(int rollNumber) {
+	        for (Student student : students) {
+	            if (student.getRollNumber() == rollNumber) {
+	                System.out.println("Student found: " + student);
+	                return;
+	            }
+	        }
+	        System.out.println("Student not found.");
+	    }
+	    public void displayAllStudents() {
+	        if (students.isEmpty()) {
+	            System.out.println("No students found.");
+	        }
+	        else {
+	            System.out.println("List of students:");
+	            for (Student student : students) {
+	                System.out.println(student);
+	            }
+	        }
+	    }
+	    private void saveStudentData() {
+	        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+	            oos.writeObject(students);
+	        } 
+	        catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    @SuppressWarnings("unchecked")
+	    private void loadStudentData() {
+	        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+	            students = (List<Student>) ois.readObject();
+	        } 
+	        catch (FileNotFoundException e) {
+	        } 
+	        catch (IOException | ClassNotFoundException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    public static String getValidatedInput(Scanner scanner, String prompt) {
+	        String input;
+	        do {
+	            System.out.print(prompt);
+	            input = scanner.nextLine().trim();
+	            if (input.isEmpty()) {
+	                System.out.println("This field cannot be empty.");
+	            }
+	        } while (input.isEmpty());
+	        return input;
+	    }
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Scanner scanner = new Scanner(System.in);
+        StudentManagement sms = new StudentManagement();
+
+        while (true) {
+            System.out.println("\nStudent Management System");
+            System.out.println("1. Add Student");
+            System.out.println("2. Remove Student");
+            System.out.println("3. Search Student");
+            System.out.println("4. Display All Students");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } 
+            catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1: 
+                    String name = getValidatedInput(scanner, "Enter student name: ");
+                    int rollNumber;
+                    while (true) {
+                        try {
+                            System.out.print("Enter roll number: ");
+                            rollNumber = Integer.parseInt(scanner.nextLine());
+                            break;
+                        } 
+                        catch (NumberFormatException e) {
+                            System.out.println("Invalid roll number. Please enter a valid number.");
+                        }
+                    }
+                    String grade = getValidatedInput(scanner, "Enter student grade: ");
+                    Student newStudent = new Student(name, rollNumber, grade);
+                    sms.addStudent(newStudent);
+                    break;
+
+                case 2: 
+                    System.out.print("Enter roll number of the student to remove: ");
+                    try {
+                        rollNumber = Integer.parseInt(scanner.nextLine());
+                        sms.removeStudent(rollNumber);
+                    }
+                    catch (NumberFormatException e) {
+                        System.out.println("Invalid roll number.");
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Enter roll number of the student to search: ");
+                    try {
+                        rollNumber = Integer.parseInt(scanner.nextLine());
+                        sms.searchStudent(rollNumber);
+                    } 
+                    catch (NumberFormatException e) {
+                        System.out.println("Invalid roll number.");
+                    }
+                    break;
+
+                case 4: 
+                    sms.displayAllStudents();
+                    break;
+
+                case 5:
+                    System.out.println("Exiting the system.");
+                    scanner.close();
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+	}
+}
+
+
